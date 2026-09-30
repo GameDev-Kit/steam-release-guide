@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Steam Release Guide · GameDev Kit</title>
+<meta name="description" content="A practical, community-driven guide to help game developers prepare, publish and release a game on Steam.">
+<style>
+  :root {
+    --bg-top: #1b2838;
+    --bg-deep: #171a21;
+    --panel: #16202d;
+    --panel-2: rgba(0, 0, 0, 0.2);
+    --text: #c6d4df;
+    --text-dim: #8f98a0;
+    --text-bright: #ffffff;
+    --blue: #66c0f4;
+    --blue-dark: #1a9fff;
+    --tag-bg: rgba(103, 193, 245, 0.2);
+    --green-a: #75b022;
+    --green-b: #588a1b;
+    --green-text: #d2efa9;
+    --price-bg: #000000;
+    --line: rgba(255, 255, 255, 0.06);
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    font-family: "Motiva Sans", "Segoe UI", Arial, Helvetica, sans-serif;
+    font-size: 14px;
+    line-height: 1.55;
+    color: var(--text);
+    background: var(--bg-top);
+    background-image:
+      radial-gradient(ellipse at 50% -10%, rgba(102, 192, 244, 0.18), transparent 60%),
+      linear-gradient(180deg, #1b2838 0%, #1b2838 60%, #171d25 100%);
+    min-height: 100vh;
+  }
+  a { color: var(--blue); text-decoration: none; }
+  a:hover { color: var(--text-bright); }
+
+  /* ---------- Top bar ---------- */
+  .topbar {
+    background: var(--bg-deep);
+    position: sticky; top: 0; z-index: 10;
+    box-shadow: 0 2px 8px rgba(0,0,0,.4);
+  }
+  .topbar-inner {
+    max-width: 1100px; margin: 0 auto; padding: 0 16px;
+    display: flex; align-items: center; gap: 28px; min-height: 64px; flex-wrap: wrap;
+  }
+  .brand {
+    display: flex; align-items: center; gap: 10px;
+    color: var(--text-bright); font-weight: 700; letter-spacing: .12em; font-size: 15px;
+    text-transform: uppercase;
+  }
+  .brand-mark {
+    width: 32px; height: 32px; border-radius: 50%;
+    background: radial-gradient(circle at 35% 35%, #66c0f4, #1a3c5a 70%);
+    display: grid; place-items: center; color: #fff; font-size: 14px;
+    box-shadow: inset 0 0 0 2px rgba(255,255,255,.15);
+  }
+  .nav { display: flex; gap: 22px; flex-wrap: wrap; }
+  .nav a {
+    color: #b8b6b4; font-size: 13px; font-weight: 600; letter-spacing: .06em;
+    text-transform: uppercase; padding: 6px 0; border-bottom: 3px solid transparent;
+  }
+  .nav a:hover, .nav a.active { color: var(--text-bright); border-bottom-color: var(--blue); }
+
+  /* ---------- Layout ---------- */
+  .wrap { max-width: 980px; margin: 0 auto; padding: 0 16px; }
+
+  .store-nav {
+    margin-top: 24px;
+    background: linear-gradient(90deg, rgba(62,126,167,.8) 0%, rgba(57,106,138,.8) 100%);
+    box-shadow: 0 0 3px rgba(0,0,0,.4);
+    display: flex; flex-wrap: wrap; font-size: 13px;
+  }
+  .store-nav a { color: #e5e5e5; padding: 9px 14px; }
+  .store-nav a:hover { background: rgba(255,255,255,.15); color: #fff; }
+
+  .breadcrumbs { margin: 18px 0 4px; font-size: 12px; color: var(--text-dim); }
+  .breadcrumbs a { color: var(--text-dim); }
+  .breadcrumbs a:hover { color: var(--text-bright); }
+  h1.app-name {
+    margin: 0 0 16px; color: var(--text-bright); font-size: 26px; font-weight: 400;
+  }
+
+  /* ---------- Hero ---------- */
+  .hero {
+    display: grid; grid-template-columns: 1.7fr 1fr; gap: 16px;
+    background: rgba(0,0,0,.25); padding: 16px;
+  }
+  .showcase {
+    position: relative; aspect-ratio: 16 / 9; max-width: 100%;
+    background:
+      linear-gradient(135deg, rgba(0,0,0,.1), rgba(0,0,0,.55)),
+      radial-gradient(circle at 20% 30%, #2a6f9b 0%, transparent 45%),
+      radial-gradient(circle at 80% 70%, #5c3d8a 0%, transparent 50%),
+      linear-gradient(160deg, #0e1a26, #203a52);
+    overflow: hidden;
+    display: flex; flex-direction: column; justify-content: flex-end; padding: 24px;
+  }
+  .showcase::before {
+    content: ""; position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(102,192,244,.07) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(102,192,244,.07) 1px, transparent 1px);
+    background-size: 32px 32px;
+    mask-image: linear-gradient(180deg, transparent, #000 70%);
+  }
+  .showcase .rocket {
+    position: absolute; right: 8%; top: 12%; font-size: clamp(56px, 11vw, 110px);
+    filter: drop-shadow(0 10px 30px rgba(102,192,244,.45));
+    animation: float 4s ease-in-out infinite;
+  }
+  @keyframes float { 50% { transform: translateY(-10px) rotate(-3deg); } }
+  .showcase .kicker {
+    position: relative; color: var(--blue); font-size: 12px; font-weight: 700;
+    letter-spacing: .2em; text-transform: uppercase;
+  }
+  .showcase .big {
+    position: relative; margin: 4px 0 0; color: #fff; font-weight: 800; line-height: 1.05;
+    font-size: clamp(26px, 5vw, 46px); letter-spacing: -.01em; text-transform: uppercase;
+    text-shadow: 0 3px 18px rgba(0,0,0,.6);
+  }
+  .showcase .big span { color: var(--blue); }
+
+  .thumbs { display: flex; gap: 6px; margin-top: 8px; overflow-x: auto; }
+  .thumb {
+    flex: 0 0 auto; width: 116px; height: 65px; display: grid; place-items: center;
+    font-size: 26px; background: #0e1a26; border: 2px solid transparent; cursor: default;
+  }
+  .thumb.on { border-color: #fff; }
+  .thumb:nth-child(2) { background: linear-gradient(135deg, #22384d, #0e1a26); }
+  .thumb:nth-child(3) { background: linear-gradient(135deg, #2f2446, #0e1a26); }
+  .thumb:nth-child(4) { background: linear-gradient(135deg, #24412a, #0e1a26); }
+  .thumb:nth-child(5) { background: linear-gradient(135deg, #47321f, #0e1a26); }
+
+  .side .capsule {
+    aspect-ratio: 460 / 215; width: 100%;
+    background:
+      radial-gradient(circle at 80% 20%, rgba(102,192,244,.55), transparent 55%),
+      linear-gradient(135deg, #10263a, #2a475e);
+    display: flex; align-items: center; justify-content: center; text-align: center;
+    color: #fff; font-weight: 800; text-transform: uppercase; letter-spacing: .06em;
+    font-size: clamp(18px, 2.4vw, 24px); line-height: 1.1; padding: 12px;
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,.08);
+  }
+  .side .capsule small { display: block; font-size: 11px; letter-spacing: .3em; color: var(--blue); margin-top: 6px; }
+  .side p.desc { margin: 12px 0; font-size: 13px; color: #acb2b8; }
+  .meta { display: grid; grid-template-columns: auto 1fr; gap: 4px 14px; font-size: 12px; margin-bottom: 12px; }
+  .meta dt { color: #556772; text-transform: uppercase; font-size: 10px; letter-spacing: .05em; padding-top: 2px; }
+  .meta dd { margin: 0; }
+  .meta .positive { color: var(--blue); }
+  .tags-label { font-size: 12px; color: #556772; margin-bottom: 4px; }
+  .tags { display: flex; flex-wrap: wrap; gap: 4px; }
+  .tag {
+    background: var(--tag-bg); color: var(--blue); font-size: 11px; padding: 0 7px;
+    line-height: 19px; border-radius: 2px;
+  }
+  .tag:hover { background: var(--blue); color: #fff; }
+
+  /* ---------- Purchase box ---------- */
+  .purchase {
+    position: relative; margin: 28px 0 8px;
+    background: linear-gradient(-60deg, rgba(226,244,255,.3) 5%, rgba(84,107,115,.3) 95%);
+    padding: 16px 16px 30px;
+  }
+  .purchase h2 { margin: 0; color: #fff; font-size: 21px; font-weight: 400; }
+  .purchase .sub { color: var(--text); font-size: 13px; margin-top: 2px; }
+  .buy {
+    position: absolute; right: 16px; bottom: -18px;
+    display: flex; align-items: stretch; background: var(--price-bg); padding: 2px; border-radius: 2px;
+  }
+  .buy .price { color: #beee11; background: #4c6b22; padding: 0 12px; display: flex; align-items: center; font-size: 13px; }
+  .buy .price s { color: #738895; margin-right: 8px; font-size: 11px; }
+  .btn-green {
+    display: inline-flex; align-items: center;
+    background: linear-gradient(90deg, var(--green-a) 5%, var(--green-b) 95%);
+    color: var(--green-text); padding: 0 16px; line-height: 32px; font-size: 15px; border-radius: 2px;
+    margin-left: 2px;
+  }
+  .btn-green:hover { background: linear-gradient(90deg, #8ed629 5%, #6aa621 95%); color: #fff; }
+  .btn-blue {
+    display: inline-block; background: rgba(103,193,245,.2); color: var(--blue);
+    padding: 0 14px; line-height: 30px; border-radius: 2px; font-size: 14px;
+  }
+  .btn-blue:hover { background: linear-gradient(-60deg, #417a9b 5%, #67c1f5 95%); color: #fff; }
+
+  /* ---------- Content grid ---------- */
+  .content { display: grid; grid-template-columns: 1fr 308px; gap: 28px; margin-top: 44px; }
+  .section-title {
+    font-size: 14px; text-transform: uppercase; letter-spacing: .03em; color: #fff;
+    padding-bottom: 4px; margin: 0 0 12px;
+    background-image: linear-gradient(to right, #3b6e8c 0%, rgba(59,110,140,0) 100%);
+    background-size: 100% 1px; background-repeat: no-repeat; background-position: bottom left;
+  }
+  .block { margin-bottom: 32px; }
+  .about p { margin: 0 0 12px; font-size: 14px; color: #acb2b8; }
+  .about strong { color: #fff; font-weight: 600; }
+  .about .note {
+    border-left: 3px solid var(--blue); background: rgba(102,192,244,.07);
+    padding: 10px 14px; color: var(--text);
+  }
+
+  /* DLC-like list */
+  .dlc { background: var(--panel-2); }
+  .dlc a.row {
+    display: grid; grid-template-columns: 52px 1fr auto; gap: 14px; align-items: center;
+    padding: 12px 14px; color: var(--text); border-bottom: 1px solid var(--line);
+  }
+  .dlc a.row:hover { background: rgba(102,192,244,.12); }
+  .dlc a.row:hover .row-title { color: #fff; }
+  .dlc .ico {
+    width: 52px; height: 52px; display: grid; place-items: center; font-size: 24px;
+    background: linear-gradient(135deg, #2a475e, #16202d);
+  }
+  .row-title { color: #dfe3e6; font-size: 15px; }
+  .row-items { font-size: 12px; color: var(--text-dim); }
+  .row-cta { font-size: 12px; color: var(--blue); white-space: nowrap; }
+
+  /* Reviews-like */
+  .reviews { display: grid; gap: 12px; }
+  .review { background: rgba(0,0,0,.2); display: grid; grid-template-columns: 56px 1fr; }
+  .review .thumbs-up {
+    background: rgba(102,192,244,.12); display: grid; place-items: center; font-size: 24px;
+  }
+  .review .body { padding: 12px 14px; }
+  .review .verdict { color: #d6d7d8; font-size: 15px; margin-bottom: 2px; }
+  .review .hours { color: #7b8c98; font-size: 11px; margin-bottom: 6px; }
+  .review p { margin: 0; color: #acb2b8; font-size: 13px; }
+
+  /* Sysreq */
+  .sysreq { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; font-size: 12px; }
+  .sysreq h4 { margin: 0 0 6px; color: #fff; font-size: 12px; text-transform: uppercase; font-weight: 400; }
+  .sysreq ul { list-style: none; margin: 0; padding: 0; color: var(--text-dim); }
+  .sysreq li { padding: 2px 0; }
+  .sysreq strong { color: #acb2b8; font-weight: 400; }
+
+  /* Right column */
+  .panel { background: rgba(0,0,0,.2); padding: 14px 16px; margin-bottom: 16px; }
+  .panel h3 { margin: 0 0 10px; font-size: 12px; text-transform: uppercase; color: #fff; font-weight: 400; letter-spacing: .03em; }
+  .features { list-style: none; margin: 0; padding: 0; }
+  .features li {
+    display: flex; gap: 10px; align-items: center; padding: 6px 8px; margin-bottom: 2px;
+    background: rgba(103,193,245,.08); color: var(--blue); font-size: 13px;
+  }
+  .panel ul.links { list-style: none; margin: 0; padding: 0; }
+  .panel ul.links li { padding: 5px 0; border-bottom: 1px solid var(--line); font-size: 13px; }
+  .panel ul.links li:last-child { border-bottom: 0; }
+  .panel p { margin: 0 0 10px; font-size: 13px; color: #acb2b8; }
+  .panel .btn-blue { width: 100%; text-align: center; margin-top: 4px; }
+  .tree {
+    font-family: Consolas, "Courier New", monospace; font-size: 11.5px; line-height: 1.5;
+    color: #9fb4c4; background: #0f151d; padding: 12px; margin: 0; overflow-x: auto; white-space: pre;
+  }
+  .tree b { color: var(--blue); font-weight: 400; }
+
+  /* ---------- Footer ---------- */
+  footer { background: var(--bg-deep); margin-top: 56px; padding: 28px 0 40px; font-size: 12px; color: #8f98a0; }
+  footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 16px; }
+  footer .legal { max-width: 620px; }
+  footer a { color: #c6d4df; }
+
+  /* ---------- Responsive ---------- */
+  @media (max-width: 860px) {
+    .hero { grid-template-columns: 1fr; }
+    .content { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 520px) {
+    .nav { display: none; }
+    .sysreq { grid-template-columns: 1fr; }
+    .purchase { padding-bottom: 60px; }
+    .buy { left: 16px; right: 16px; }
+    .buy .btn-green { flex: 1; justify-content: center; }
+    .dlc a.row { grid-template-columns: 44px 1fr; }
+    .dlc .ico { width: 44px; height: 44px; font-size: 20px; }
+    .row-cta { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="#top"><span class="brand-mark">▲</span>GameDev Kit</a>
+    <nav class="nav">
+      <a class="active" href="#top">Guide</a>
+      <a href="#contents">Contents</a>
+      <a href="#contribute">Community</a>
+      <a href="https://github.com/GameDev-Kit">About</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap" id="top">
+
+  <div class="store-nav">
+    <a href="#about">About</a>
+    <a href="#contents">What's inside</a>
+    <a href="#requirements">Requirements</a>
+    <a href="#resources">Official resources</a>
+    <a href="#contribute">Contribute</a>
+  </div>
+
+  <div class="breadcrumbs">
+    <a href="https://github.com/GameDev-Kit">GameDev Kit</a> &gt;
+    <a href="#contents">Guides</a> &gt;
+    Steam Release Guide
+  </div>
+  <h1 class="app-name">Steam Release Guide</h1>
+
+  <!-- Hero -->
+  <section class="hero">
+    <div>
+      <div class="showcase">
+        <div class="rocket" aria-hidden="true">🚀</div>
+        <div class="kicker">From Steamworks to launch day</div>
+        <div class="big">Ship your game<br>on <span>Steam</span></div>
+      </div>
+      <div class="thumbs" aria-hidden="true">
+        <div class="thumb on">🚀</div>
+        <div class="thumb">🏪</div>
+        <div class="thumb">🛠️</div>
+        <div class="thumb">📦</div>
+        <div class="thumb">✅</div>
+      </div>
+    </div>
+
+    <aside class="side">
+      <div class="capsule"><div>Steam Release Guide<small>GameDev Kit</small></div></div>
+      <p class="desc">A practical, community-driven guide to help game developers prepare, publish and release a game on Steam — explained simply, step by step.</p>
+      <dl class="meta">
+        <dt>Reviews</dt><dd class="positive">Made by devs, for devs</dd>
+        <dt>Price</dt><dd>Free &amp; open source (MIT)</dd>
+        <dt>Developer</dt><dd><a href="https://github.com/GameDev-Kit">GameDev Kit</a></dd>
+        <dt>Publisher</dt><dd>The community</dd>
+      </dl>
+      <div class="tags-label">Popular user-defined tags for this guide:</div>
+      <div class="tags">
+        <a class="tag" href="#contents">Indie</a>
+        <a class="tag" href="#contents">Steamworks</a>
+        <a class="tag" href="#contents">Store Page</a>
+        <a class="tag" href="#contents">Launch</a>
+        <a class="tag" href="#contents">Checklists</a>
+        <a class="tag" href="#contribute">Open Source</a>
+      </div>
+    </aside>
+  </section>
+
+  <!-- Purchase box -->
+  <div class="purchase">
+    <h2>Read Steam Release Guide</h2>
+    <div class="sub">The whole guide lives on GitHub. No account, no fee, no DRM.</div>
+    <div class="buy">
+      <div class="price"><s>$100</s>Free</div>
+      <a class="btn-green" href="https://github.com/GameDev-Kit/steam-release-guide">Open on GitHub</a>
+    </div>
+  </div>
+
+  <div class="content">
+    <div>
+
+      <!-- About -->
+      <section class="block about" id="about">
+        <h2 class="section-title">About this guide</h2>
+        <p>Releasing a game on Steam means dealing with a Steamworks app, a store page, builds and depots, a Valve review, a Coming Soon page and finally launch day. The official documentation covers all of it — across <strong>hundreds of pages</strong>.</p>
+        <p><strong>Steam Release Guide</strong> turns that into a simple, practical reference for indie developers: what you need to do, in what order, and what to watch out for.</p>
+        <p class="note">This is <strong>not a replacement</strong> for the official Steamworks documentation. It's a curated, simplified companion — always check the official docs for the latest requirements and policies.</p>
+      </section>
+
+      <!-- Contents -->
+      <section class="block" id="contents">
+        <h2 class="section-title">What's inside</h2>
+        <div class="dlc">
+          <a class="row" href="https://github.com/GameDev-Kit/steam-release-guide/tree/main/store-page">
+            <span class="ico">🏪</span>
+            <span><div class="row-title">Steam Store Page</div><div class="row-items">Description · Capsule art · Screenshots · Trailers · Tags · Localization</div></span>
+            <span class="row-cta">View ›</span>
+          </a>
+          <a class="row" href="https://github.com/GameDev-Kit/steam-release-guide">
+            <span class="ico">🛠️</span>
+            <span><div class="row-title">Steamworks Setup</div><div class="row-items">App configuration · Steamworks features · Depots &amp; builds · Branches &amp; testing</div></span>
+            <span class="row-cta">View ›</span>
+          </a>
+          <a class="row" href="https://github.com/GameDev-Kit/steam-release-guide/tree/main/build">
+            <span class="ico">📦</span>
+            <span><div class="row-title">Build &amp; Distribution</div><div class="row-items">Preparing your build · Uploading · Testing on Steam · Common issues</div></span>
+            <span class="row-cta">View ›</span>
+          </a>
+          <a class="row" href="https://github.com/GameDev-Kit/steam-release-guide/tree/main/release">
+            <span class="ico">🚀</span>
+            <span><div class="row-title">Release</div><div class="row-items">Coming Soon page · Valve review · Release checklist · Launch day · Post-launch</div></span>
+            <span class="row-cta">View ›</span>
+          </a>
+          <a class="row" href="https://github.com/GameDev-Kit/steam-release-guide/tree/main/checklists">
+            <span class="ico">✅</span>
+            <span><div class="row-title">Checklists</div><div class="row-items">Store page · Build · Pre-release · Launch</div></span>
+            <span class="row-cta">View ›</span>
+          </a>
+        </div>
+      </section>
+
+      <!-- Why -->
+      <section class="block">
+        <h2 class="section-title">Why use it?</h2>
+        <div class="reviews">
+          <div class="review">
+            <div class="thumbs-up">👍</div>
+            <div class="body">
+              <div class="verdict">Simple</div>
+              <div class="hours">No jargon wall</div>
+              <p>Each step is explained in plain words, so you understand what Steam expects before you open Steamworks.</p>
+            </div>
+          </div>
+          <div class="review">
+            <div class="thumbs-up">👍</div>
+            <div class="body">
+              <div class="verdict">Practical</div>
+              <div class="hours">Checklists included</div>
+              <p>Ready-to-follow checklists for your store page, builds, pre-release and launch — tick them off and ship.</p>
+            </div>
+          </div>
+          <div class="review">
+            <div class="thumbs-up">👍</div>
+            <div class="body">
+              <div class="verdict">Community-driven</div>
+              <div class="hours">Open to contributions</div>
+              <p>Written and kept up to date by game developers who've been through the process themselves.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Requirements -->
+      <section class="block" id="requirements">
+        <h2 class="section-title">System requirements</h2>
+        <div class="sysreq">
+          <div>
+            <h4>Minimum:</h4>
+            <ul>
+              <li><strong>Game:</strong> A game you want to release</li>
+              <li><strong>Account:</strong> Steamworks partner account</li>
+              <li><strong>Fee:</strong> Steam Direct app fee</li>
+              <li><strong>Time:</strong> A few evenings of reading</li>
+            </ul>
+          </div>
+          <div>
+            <h4>Recommended:</h4>
+            <ul>
+              <li><strong>Plan:</strong> Start before your game is finished</li>
+              <li><strong>Page:</strong> Coming Soon page live early</li>
+              <li><strong>Mindset:</strong> Follow the checklists</li>
+              <li><strong>Extra:</strong> Share what you learned via a PR</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- Right column -->
+    <aside>
+      <div class="panel">
+        <h3>Features</h3>
+        <ul class="features">
+          <li>📖 Step-by-step guide</li>
+          <li>✅ Release checklists</li>
+          <li>🌍 Free &amp; open source</li>
+          <li>🤝 Community contributions</li>
+        </ul>
+      </div>
+
+      <div class="panel" id="resources">
+        <h3>Official resources</h3>
+        <ul class="links">
+          <li><a href="https://partner.steamgames.com/doc/home">Steamworks Documentation</a></li>
+          <li><a href="https://partner.steamgames.com/steamdirect">Steam Direct</a></li>
+          <li><a href="https://partner.steamgames.com/doc/store">Steam Store Presence</a></li>
+          <li><a href="https://partner.steamgames.com/doc/sdk">Steamworks SDK</a></li>
+        </ul>
+      </div>
+
+      <div class="panel">
+        <h3>Repository structure</h3>
+<pre class="tree">steam-release-guide/
+├── getting-started.md
+├── steamworks.md
+├── <b>store-page/</b>
+├── <b>build/</b>
+├── <b>release/</b>
+└── <b>checklists/</b></pre>
+      </div>
+
+      <div class="panel" id="contribute">
+        <h3>Contribute</h3>
+        <p>Found outdated info, a missing step, or something that could be explained better? Open an issue, submit a pull request, or help keep the checklists up to date.</p>
+        <a class="btn-blue" href="https://github.com/GameDev-Kit/steam-release-guide/issues">Open an issue</a>
+        <a class="btn-blue" href="https://github.com/GameDev-Kit/steam-release-guide/pulls">Submit a pull request</a>
+      </div>
+    </aside>
+  </div>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="legal">
+      © 2026 <a href="https://github.com/GameDev-Kit">GameDev Kit</a> · Released under the MIT License.<br>
+      This is an unofficial community project. It is not affiliated with, endorsed by, or sponsored by Valve Corporation. Steam and Steamworks are trademarks of Valve Corporation.
+    </div>
+    <div><a href="https://github.com/GameDev-Kit/steam-release-guide">View on GitHub</a></div>
+  </div>
+</footer>
+
+</body>
+</html>
